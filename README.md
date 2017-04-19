@@ -5,14 +5,14 @@ Some customized keras layers used in Yoctol NLU.
 
 `pip install yoctol-keras-layer-zoo`
 
-## Note! We use tensorflow backend while using keras. 
-## Please install tensorflow by yourself. 
-## Either tensorflow-gpu or tensorflow is fine.
+### Note! We use tensorflow backend while using keras. 
+### Please install tensorflow by yourself. 
+### Either tensorflow-gpu or tensorflow is fine.
 
-* Install tensorflow with GPU version.
+  * Install tensorflow with GPU version.
 
-  `pip install tensorflow-gpu`
+    `pip install tensorflow-gpu`
 
-* Or install tenserflow with CPU version.
+  * Or install tenserflow with CPU version.
 
-  `pip install tensorflow`
+    `pip install tensorflow`
