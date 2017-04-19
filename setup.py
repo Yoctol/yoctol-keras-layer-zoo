@@ -13,7 +13,7 @@ setup(
     license="GPL3",
     author="plliao",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=['keras', 'numpy'],
     long_description=long_description,
     classifiers=[
         "Programming Language :: Python",
