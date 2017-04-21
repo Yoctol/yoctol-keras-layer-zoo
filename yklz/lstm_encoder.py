@@ -1,78 +1,117 @@
 from keras.layers.recurrent import LSTM
+from keras.layers import activations
+from keras.engine import InputSpec
 import keras.backend as K
 import tensorflow as tf
 
 class LSTMEncoder(LSTM):
-    def __init__(self, **kwargs):
+    def __init__(
+            self, 
+            output_units, 
+            use_output_bias=True, 
+            output_activation='relu',
+            output_dropout=0.,
+            **kwargs
+        ):
+        self.output_units = output_units
+        self.use_output_bias = use_output_bias
+        self.output_dropout = min(1., max(0., output_dropout))
+        self.output_activation = activations.get(output_activation)
+
         kwargs['return_sequences'] = False
+        kwargs['units'] = output_units
         super(LSTMEncoder, self).__init__(**kwargs)
 
     def build(self, input_shape):
+        self.output_kernel = self.add_weight(
+            shape=(self.units, self.units),
+            name='output_kernel',
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint
+        )
+
+        if self.use_output_bias:
+            self.output_bias = self.add_weight(
+                shape=(self.units,),
+                name='output_bias',
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint
+            )
+        else:
+            self.output_bias = None
+
         super(LSTMEncoder, self).build(input_shape)
+        batch_size = input_shape[0] if self.stateful else None
+        self.state_spec.append(
+            InputSpec(shape=(batch_size, self.units))
+        )
+        self.states.append(None)
+
+
+    def get_constants(self, inputs, training=None):
+        constants = super(LSTMEncoder, self).get_constants(
+            inputs=inputs,
+            training=training
+        )
+
+        if 0 < self.output_dropout < 1:
+            ones = K.ones_like(K.reshape(inputs[:, 0, 0], (-1, 1)))
+            ones = K.tile(ones, (1, self.units))
+
+            def dropped_inputs():
+                return K.dropout(ones, self.output_dropout)
+            out_dp_mask = [K.in_train_phase(dropped_inputs,
+                                            ones,
+                                            training=training)]
+            constants.append(out_dp_mask)
+        else:
+            constants.append([K.cast_to_floatx(1.)])
+
+        return constants
 
     def call(self, inputs, mask=None, initial_state=None, training=None):
         inputs_shape = K.shape(inputs)
-        zeros = tf.zeros(shape=[inputs_shape[0], inputs_shape[1] - 1, self.units])
+        zeros = tf.zeros(
+            shape=[
+                inputs_shape[0], 
+                inputs_shape[1] - 1, 
+                self.units
+            ]
+        )
         outputs = super(LSTMEncoder, self).call(
             inputs=inputs,
             mask=mask,
             initial_state=initial_state,
             training=training
         )
-        outputs = K.reshape(outputs, shape=(inputs_shape[0], 1, self.units))
+        outputs = K.reshape(
+            outputs, 
+            shape=(inputs_shape[0], 1, self.units)
+        )
         return K.concatenate([outputs, zeros], axis=1)
 
     def step(self, inputs, states):
-        h_tm1 = states[0]
-        c_tm1 = states[1]
-        dp_mask = states[2]
-        rec_dp_mask = states[3]
-        
-        if self.implementation == 2:
-            z = K.dot(inputs * dp_mask[0], self.kernel)
-            z += K.dot(c_tm1 * rec_dp_mask[0], self.recurrent_kernel)
-            if self.use_bias:
-                z = K.bias_add(z, self.bias)
+        y_tm1 = states[0]
+        h_tm1 = states[1]
+        c_tm1 = states[2]
+        dp_mask = states[3]
+        rec_dp_mask = states[4]
+        out_dp_mask = states[5]
 
-            z0 = z[:, :self.units]
-            z1 = z[:, self.units: 2 * self.units]
-            z2 = z[:, 2 * self.units: 3 * self.units]
-            z3 = z[:, 3 * self.units:]
+        h, new_states = super(LSTMEncoder, self).step(
+            inputs, 
+            [h_tm1, c_tm1, dp_mask, rec_dp_mask]
+        )
+        _, c = new_states
 
-            i = self.recurrent_activation(z0)
-            f = self.recurrent_activation(z1)
-            c = f * c_tm1 + i * self.activation(z2)
-            o = self.recurrent_activation(z3)
-        else:
-            if self.implementation == 0:
-                x_i = inputs[:, :self.units]
-                x_f = inputs[:, self.units: 2 * self.units]
-                x_c = inputs[:, 2 * self.units: 3 * self.units]
-                x_o = inputs[:, 3 * self.units:]
-            elif self.implementation == 1:
-                x_i = K.dot(inputs * dp_mask[0], self.kernel_i) + self.bias_i
-                x_f = K.dot(inputs * dp_mask[1], self.kernel_f) + self.bias_f
-                x_c = K.dot(inputs * dp_mask[2], self.kernel_c) + self.bias_c
-                x_o = K.dot(inputs * dp_mask[3], self.kernel_o) + self.bias_o
-            else:
-                raise ValueError('Unknown `implementation` mode.')
+        y = K.dot(h * out_dp_mask[0], self.output_kernel)
+        if self.output_bias is not None:
+            y = y + self.output_bias
 
-            i = self.recurrent_activation(
-                x_i + K.dot(c_tm1 * rec_dp_mask[0], self.recurrent_kernel_i)
-            )
-            f = self.recurrent_activation(
-                x_f + K.dot(c_tm1 * rec_dp_mask[1], self.recurrent_kernel_f)
-            )
-            c = f * c_tm1 + i * self.activation(
-                x_c + K.dot(c_tm1 * rec_dp_mask[2], self.recurrent_kernel_c)
-            )
-            o = self.recurrent_activation(
-                x_o + K.dot(c_tm1 * rec_dp_mask[3], self.recurrent_kernel_o)
-            )
-        h = o * self.activation(c)
-        if 0 < self.dropout + self.recurrent_dropout:
-            h._uses_learning_phase = True
-        return h, [h, c]
+        y = self.output_activation(y)
+        return y, [y, h, c]
 
     def compute_output_shape(self, input_shape):
         if isinstance(input_shape, list):
@@ -81,3 +120,13 @@ class LSTMEncoder(LSTM):
 
     def compute_mask(self, inputs, mask):
         return mask
+
+    def get_config(self):
+        config = {
+            'output_units': self.output_units,
+            'use_output_bias': self.use_output_bias,
+            'output_dropout': self.output_dropout,
+            'output_activation': self.output_activation,
+        }
+        base_config = super(LSTMEncoder, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
