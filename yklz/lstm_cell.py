@@ -8,7 +8,7 @@ class LSTMCell(LSTM):
             self, 
             output_units, 
             use_output_bias=True, 
-            output_activation='relu',
+            output_activation='tanh',
             output_dropout=0.,
             **kwargs
         ):
