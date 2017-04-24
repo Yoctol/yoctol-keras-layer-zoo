@@ -88,6 +88,8 @@ class LSTMCell(LSTM):
             y = y + self.output_bias
 
         y = self.output_activation(y)
+        if 0 < self.dropout + self.recurrent_dropout + self.output_dropout:
+            y._uses_learning_phase = True
         return y, [y, h, c]
 
     def get_config(self):
