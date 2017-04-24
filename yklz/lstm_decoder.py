@@ -9,6 +9,7 @@ class LSTMDecoder(LSTMCell):
             output_units,
             **kwargs
         ):
+        kwargs['return_sequences'] = True
         kwargs['output_units'] = output_units
         super(LSTMDecoder, self).__init__(**kwargs)
 

@@ -9,7 +9,7 @@ class LSTMEncoder(LSTMCell):
             output_units,
             **kwargs
         ):
-        kwargs['return_sequences'] = False
+        kwargs['return_sequences'] = True
         kwargs['output_units'] = output_units
         super(LSTMEncoder, self).__init__(**kwargs)
 
@@ -29,15 +29,11 @@ class LSTMEncoder(LSTMCell):
             training=training
         )
         outputs = K.reshape(
-            outputs, 
+            tf.slice(outputs, [0, inputs_shape[1] - 1,0], [-1, 1, -1]), 
             shape=(inputs_shape[0], 1, self.units)
         )
-        return K.concatenate([outputs, zeros], axis=1)
+        outputs = K.concatenate([outputs, zeros], axis=1)
 
-    def compute_output_shape(self, input_shape):
-        if isinstance(input_shape, list):
-            input_shape = input_shape[0]
-        return (input_shape[0], input_shape[1], self.units)
-
-    def compute_mask(self, inputs, mask):
-        return mask
+        if 0 < self.dropout + self.recurrent_dropout:
+            outputs._uses_learning_phase = True
+        return outputs
