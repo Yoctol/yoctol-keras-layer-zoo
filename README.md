@@ -3,7 +3,7 @@ Some customized keras layers used in Yoctol NLU.
 
 ## Install
 
-`pip install yoctol_keras_layerzoo`
+`pip install yoctol_keras_layer_zoo`
 
 ### Note! We use tensorflow backend while using keras. 
 ### Please install tensorflow by yourself. 
