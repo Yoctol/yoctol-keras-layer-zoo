@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 try:
     long_description = open("README.rst").read()
 except IOError:
-    long_description = ""
+    long_description = "customed Keras Layer used in Yoctol"
 
 setup(
     name="yoctol-keras-layer-zoo",
-    version="0.3.0",
+    version="0.3.1",
     description="A pip package",
     license="GPL3",
     author="plliao",

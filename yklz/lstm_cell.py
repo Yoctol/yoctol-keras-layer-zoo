@@ -3,7 +3,9 @@ from keras.layers import activations
 from keras.engine import InputSpec
 import keras.backend as K
 
-class LSTMCell(LSTM):
+from .lstm_peephole import LSTMPeephole
+
+class LSTMCell(LSTMPeephole):
     def __init__(
             self, 
             output_units, 
