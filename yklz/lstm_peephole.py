@@ -2,11 +2,13 @@ from keras.layers.recurrent import LSTM
 import keras.backend as K
 
 class LSTMPeephole(LSTM):
-    def __init__(self, **kwargs):
+    def __init__(self, units, **kwargs):
+        kwargs['units'] = units
         super(LSTMPeephole, self).__init__(**kwargs)
 
     def build(self, input_shape):
         super(LSTMPeephole, self).build(input_shape)
+        self.recurrent_kernel_c = K.zeros_like(self.recurrent_kernel_c)
 
     def step(self, inputs, states):
         h_tm1 = states[0]
@@ -59,6 +61,3 @@ class LSTMPeephole(LSTM):
         if 0 < self.dropout + self.recurrent_dropout:
             h._uses_learning_phase = True
         return h, [h, c]
-
-    def compute_output_shape(self, input_shape):
-        return super(LSTMPeephole, self).compute_output_shape(input_shape)
