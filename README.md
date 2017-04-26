@@ -60,7 +60,7 @@ The Peephole LSTM with another dense layer behind its hidden states.
  inputs = Input(shape=(max_length, feature_size))
  masked_inputs = Masking(0.0)(inputs)
  outputs = LSTMCell(
-     output_units=output_units,
+     units=units,
      return_sequences=True
  )(masked_inputs)
  model = Model(inputs, outputs)
@@ -90,7 +90,7 @@ The Peephole LSTM with another dense layer behind its hidden states.
  inputs = Input(shape=(max_length, feature_size))
  masked_inputs = Masking(0.0)(inputs)
  outputs = LSTMEncoder(
-     output_units=encoding_size,
+     units=encoding_size,
  )(masked_inputs)
  model = Model(inputs, outputs)
  model.compile('sgd', 'mean_squared_error')
@@ -107,7 +107,7 @@ The Peephole LSTM with another dense layer behind its hidden states.
  masked_inputs = Masking(0.0)(inputs)
  outputs = Bidirectional_Encoder(
      LSTMEncoder(
-         output_units=encoding_size,
+         units=encoding_size,
      )
  )(masked_inputs)
  model = Model(inputs, outputs)
@@ -133,10 +133,10 @@ That's why we pad zero vectors after the encoded vector in LSTMEncoder.
  inputs = Input(shape=(max_length, feature_size))
  masked_inputs = Masking(0.0)(inputs)
  encoded_seq = LSTMEncoder(
-     output_units=encoding_size,
+     units=encoding_size,
  )(masked_inputs)
  outputs = LSTMDecoder(
-     output_units=decoding_size
+     units=decoding_size
  )(encoded_seq)
  model = Model(inputs, outputs)
  model.compile('sgd', 'mean_squared_error')

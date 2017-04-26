@@ -2,9 +2,44 @@ from keras.layers.recurrent import LSTM
 import keras.backend as K
 
 class LSTMPeephole(LSTM):
-    def __init__(self, units, **kwargs):
-        kwargs['units'] = units
-        super(LSTMPeephole, self).__init__(**kwargs)
+    def __init__(self, units,
+                 activation='tanh',
+                 recurrent_activation='hard_sigmoid',
+                 use_bias=True,
+                 kernel_initializer='glorot_uniform',
+                 recurrent_initializer='orthogonal',
+                 bias_initializer='zeros',
+                 unit_forget_bias=True,
+                 kernel_regularizer=None,
+                 recurrent_regularizer=None,
+                 bias_regularizer=None,
+                 activity_regularizer=None,
+                 kernel_constraint=None,
+                 recurrent_constraint=None,
+                 bias_constraint=None,
+                 dropout=0.,
+                 recurrent_dropout=0.,
+                 **kwargs):
+        super(LSTMPeephole, self).__init__(
+            units=units,
+            activation=activation,
+            recurrent_activation=recurrent_activation,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            recurrent_initializer=recurrent_initializer,
+            bias_initializer=bias_initializer,
+            unit_forget_bias=unit_forget_bias,
+            kernel_regularizer=kernel_regularizer,
+            recurrent_regularizer=recurrent_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            recurrent_constraint=recurrent_constraint,
+            bias_constraint=bias_constraint,
+            dropout=dropout,
+            recurrent_dropout=recurrent_dropout,
+            **kwargs
+        )
 
     def build(self, input_shape):
         super(LSTMPeephole, self).build(input_shape)
