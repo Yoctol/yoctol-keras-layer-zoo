@@ -6,21 +6,51 @@ import keras.backend as K
 from .lstm_peephole import LSTMPeephole
 
 class LSTMCell(LSTMPeephole):
-    def __init__(
-            self, 
-            output_units, 
-            use_output_bias=True, 
-            output_activation='tanh',
-            output_dropout=0.,
-            **kwargs
-        ):
-        self.output_units = output_units
+    def __init__(self, units, 
+                 activation='tanh',
+                 recurrent_activation='hard_sigmoid',
+                 use_bias=True,
+                 kernel_initializer='glorot_uniform',
+                 recurrent_initializer='orthogonal',
+                 bias_initializer='zeros',
+                 unit_forget_bias=True,
+                 kernel_regularizer=None,
+                 recurrent_regularizer=None,
+                 bias_regularizer=None,
+                 activity_regularizer=None,
+                 kernel_constraint=None,
+                 recurrent_constraint=None,
+                 bias_constraint=None,
+                 dropout=0.,
+                 recurrent_dropout=0.,
+                 use_output_bias=True, 
+                 output_activation='tanh',
+                 output_dropout=0.,
+                 **kwargs):
         self.use_output_bias = use_output_bias
         self.output_dropout = min(1., max(0., output_dropout))
         self.output_activation = activations.get(output_activation)
 
-        kwargs['units'] = output_units
-        super(LSTMCell, self).__init__(**kwargs)
+        super(LSTMCell, self).__init__(
+            units=units,
+            activation=activation,
+            recurrent_activation=recurrent_activation,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            recurrent_initializer=recurrent_initializer,
+            bias_initializer=bias_initializer,
+            unit_forget_bias=unit_forget_bias,
+            kernel_regularizer=kernel_regularizer,
+            recurrent_regularizer=recurrent_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            recurrent_constraint=recurrent_constraint,
+            bias_constraint=bias_constraint,
+            dropout=dropout,
+            recurrent_dropout=recurrent_dropout,
+            **kwargs
+        )
 
     def build(self, input_shape):
         self.output_kernel = self.add_weight(
@@ -96,7 +126,6 @@ class LSTMCell(LSTMPeephole):
 
     def get_config(self):
         config = {
-            'output_units': self.output_units,
             'use_output_bias': self.use_output_bias,
             'output_dropout': self.output_dropout,
             'output_activation': self.output_activation,
