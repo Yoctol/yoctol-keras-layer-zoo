@@ -16,6 +16,7 @@ class TestLSTMBaseClass(object):
         self.mask_start_point = 7
         self.data = np.random.rand(self.data_size, self.max_length, self.feature_size)
         self.data[:, self.mask_start_point:, :] = 0.0
+        self.y = np.random.rand(self.data_size, self.max_length, self.encoding_size)
 
     def create_model(self, LSTMLayer):
         inputs = Input(shape=(self.max_length, self.feature_size))
@@ -29,6 +30,20 @@ class TestLSTMBaseClass(object):
         return model
 
     def test_output_shape(self):
+        result = self.model.predict(self.data)
+        self.assertEqual(
+            result.shape, 
+            (self.data_size, self.max_length, self.encoding_size)
+        )
+
+    def test_training(self):
+        self.model.fit(
+            self.data, 
+            self.y, 
+            epochs=2, 
+            validation_split=0.1,
+            batch_size=10
+        )
         result = self.model.predict(self.data)
         self.assertEqual(
             result.shape, 
