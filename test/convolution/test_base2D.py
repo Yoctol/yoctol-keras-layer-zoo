@@ -8,7 +8,7 @@ class TestBase2DClass(object):
         self.batch_size = 100
         self.x = 10
         self.y = 15
-        self.channel_size = 5
+        self.channel_size = 7
 
         self.data = np.random.rand(
             self.batch_size,
