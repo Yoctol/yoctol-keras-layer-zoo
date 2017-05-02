@@ -53,7 +53,7 @@ class Convolution2D(Conv2D):
     def compute_mask(self, inputs, mask):
         inputs_shape = K.int_shape(inputs)
         if self.padding == 'same':
-            return mask
+            return NotImplementedError('Please use valid padding.');
         elif self.padding == 'valid':
             mask_tensor = K.cast(mask, K.floatx())
             mask_tensor = K.expand_dims(mask_tensor)
@@ -74,3 +74,18 @@ class Convolution2D(Conv2D):
             next_mask_tensor = K.not_equal(mask_output, 0.0)
             return next_mask_tensor
 
+    def call(self, inputs):
+        outputs = super(Convolution2D, self).call(inputs)
+        mask_inputs = K.not_equal(inputs, 0.0)
+        mask_inputs = K.cast(mask_inputs, K.floatx())
+        mask_output = K.conv2d(
+                mask_inputs,
+                self.mask_kernel,
+                self.strides,
+                self.padding,
+                self.data_format,
+                self.dilation_rate            
+        )
+        mask_output = K.repeat_elements(mask_output, self.filters, 3) 
+        return outputs * mask_output
+     

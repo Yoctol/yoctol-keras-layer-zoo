@@ -1,6 +1,7 @@
 '''Convolution 2D class testcase'''
 from unittest import TestCase
 
+import numpy as np
 from keras.models import Input, Model
 
 from yklz import Convolution2D
@@ -42,3 +43,41 @@ class TestConvolution2DClass(TestBase2DClass, TestCase):
                 self.filters
             )
         )
+
+    def test_mask_zero(self):
+        result = self.model.predict(self.data)
+        _, x, y, _ = result.shape
+        x_start_mask = (self.x_start - self.kernel[0]) // self.stride[0] + 1
+        y_start_mask = (self.y_start - self.kernel[1]) // self.stride[1] + 1
+        x_end_mask = (
+            self.x_end + self.stride[0] - 1
+        ) // self.stride[0]
+        y_end_mask = (
+            self.y_end + self.stride[1] - 1
+        ) // self.stride[1]
+        np.testing.assert_array_almost_equal(
+            result[:, :x_start_mask, :, :],
+            np.zeros((
+                self.batch_size, x_start_mask, y, self.filters
+            ))
+        )
+        np.testing.assert_array_almost_equal(
+            result[:, :, :y_start_mask, :],
+            np.zeros((
+                self.batch_size, x, y_start_mask, self.filters
+            ))
+        )
+        if (x_end_mask < x):
+            np.testing.assert_array_almost_equal(
+                result[:, x_end_mask:, :, :],
+                np.zeros((
+                    self.batch_size, x - x_end_mask, y, self.filters
+                ))
+            )
+        if (y_end_mask < y):
+            np.testing.assert_array_almost_equal(
+                result[:, :, y_end_mask:, :],
+                np.zeros((
+                    self.batch_size, x, y - y_end_mask, self.filters
+                ))
+            )

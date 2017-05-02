@@ -6,8 +6,8 @@ class TestBase2DClass(object):
     def setUp(self):
         self.mask_value = 1.0
         self.batch_size = 100
-        self.x = 10
-        self.y = 15
+        self.x = 30
+        self.y = 45
         self.channel_size = 7
 
         self.data = np.random.rand(
