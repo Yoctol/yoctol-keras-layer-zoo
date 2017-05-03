@@ -17,8 +17,8 @@ class TestBase2DClass(object):
             self.channel_size
         )
 
-        self.x_start, self.x_end = 3, 7
-        self.y_start, self.y_end = 4, 12
+        self.x_start, self.x_end = 3, 20
+        self.y_start, self.y_end = 4, 32
         self.fake_x_mask, self.fake_y_mask = 5, 7
 
         self.data[:, :self.x_start, :, :] = self.mask_value
