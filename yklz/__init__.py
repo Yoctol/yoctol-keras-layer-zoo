@@ -10,6 +10,9 @@ from .convolution.convolution2D import Convolution2D
 '''Customed masking layers'''
 from .masking.mask2D import Mask2D
 
+'''Customed pooling layers'''
+from .pooling.mask_max2D_pooling import MaskedMax2DPooling
+
 '''Utility Layers'''
 from .util.padding_layer import PaddingZero
 
