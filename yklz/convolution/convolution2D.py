@@ -39,29 +39,18 @@ class Convolution2D(Conv2D):
             **kwargs
         )
         self.supports_masking = True
-    
+  
     def build(self, input_shape):
         super(Convolution2D, self).build(input_shape)
-        if self.data_format == 'channels_first':
-            channel_axis = 1
-        else:
-            channel_axis = -1
-        channel_dim = input_shape[channel_axis]
-        mask_kernel_shape = self.kernel_size + (channel_dim, 1)
+        mask_kernel_shape = self.kernel_size + (1, 1)
         self.mask_kernel = K.ones(mask_kernel_shape)
 
     def compute_mask(self, inputs, mask):
-        inputs_shape = K.int_shape(inputs)
         if self.padding == 'same':
-            return NotImplementedError('Please use valid padding.');
+            raise NotImplementedError('Please use valid padding.');
         elif self.padding == 'valid':
             mask_tensor = K.cast(mask, K.floatx())
             mask_tensor = K.expand_dims(mask_tensor)
-            mask_tensor = K.repeat_elements(
-                mask_tensor,
-                inputs_shape[3],
-                3
-            )
             mask_output = K.conv2d(
                 mask_tensor,
                 self.mask_kernel,
@@ -74,18 +63,18 @@ class Convolution2D(Conv2D):
             next_mask_tensor = K.not_equal(mask_output, 0.0)
             return next_mask_tensor
 
-    def call(self, inputs):
+    def call(self, inputs, mask=None):
         outputs = super(Convolution2D, self).call(inputs)
-        mask_inputs = K.not_equal(inputs, 0.0)
-        mask_inputs = K.cast(mask_inputs, K.floatx())
+        mask_tensor = K.cast(mask, K.floatx())
+        mask_tensor = K.expand_dims(mask_tensor)
         mask_output = K.conv2d(
-                mask_inputs,
-                self.mask_kernel,
-                self.strides,
-                self.padding,
-                self.data_format,
-                self.dilation_rate            
+            mask_tensor,
+            self.mask_kernel,
+            self.strides,
+            self.padding,
+            self.data_format,
+            self.dilation_rate            
         )
-        mask_output = K.repeat_elements(mask_output, self.filters, 3) 
+        mask_output = K.repeat_elements(mask_output, self.filters, 3)
         return outputs * mask_output
-     
+ 
