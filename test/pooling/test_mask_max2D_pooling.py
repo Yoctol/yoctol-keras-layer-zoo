@@ -15,13 +15,13 @@ class TestMaskedMax2DPoolingClass(TestBase2DClass, TestCase):
         self.pool_size = (2, 3)
         self.strides = (3, 2)
         self.padding = 'valid'
-        
+
         self.data[
-            :, 
-            self.x_start:self.x_end, 
+            :,
+            self.x_start:self.x_end,
             self.y_start:self.y_end,
             :
-        ] = -2.0 
+        ] = -2.0
 
         self.model = self.create_model()
 
@@ -35,7 +35,7 @@ class TestMaskedMax2DPoolingClass(TestBase2DClass, TestCase):
         )(masked_inputs)
         model = Model(inputs, outputs)
         model.compile('sgd', 'mean_squared_error')
-        return model 
+        return model
 
     def test_output_shape(self):
         result = self.model.predict(self.data)
@@ -44,7 +44,7 @@ class TestMaskedMax2DPoolingClass(TestBase2DClass, TestCase):
             self.pool_size[0],
             self.padding,
             self.strides[0]
-        ) 
+        )
         output_y = conv_output_length(
             self.y,
             self.pool_size[1],
@@ -93,7 +93,7 @@ class TestMaskedMax2DPoolingClass(TestBase2DClass, TestCase):
                     self.batch_size, x, y - y_end_mask, self.channel_size
                 ))
             )
-        
+
     def test_negative_value(self):
         result = self.model.predict(self.data)
         x_start_mask = (self.x_start - self.pool_size[0]) // self.strides[0] + 1
@@ -107,7 +107,7 @@ class TestMaskedMax2DPoolingClass(TestBase2DClass, TestCase):
         np.testing.assert_array_almost_equal(
             result[:, x_start_mask:x_end_mask, y_start_mask:y_end_mask, :],
             np.ones(shape=(
-                self.batch_size, 
+                self.batch_size,
                 x_end_mask - x_start_mask,
                 y_end_mask - y_start_mask,
                 self.channel_size

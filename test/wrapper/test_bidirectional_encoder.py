@@ -18,8 +18,8 @@ class TestBidirectionalEncoder(TestCase):
 
         self.mask_point = 7
         self.data = np.random.rand(
-            self.batch_size, 
-            self.max_length, 
+            self.batch_size,
+            self.max_length,
             self.feature_size
         )
         self.data[:, self.mask_point:, :] = 0.0
@@ -44,15 +44,15 @@ class TestBidirectionalEncoder(TestCase):
         self.assertEqual(
             result.shape,
             (self.batch_size, self.max_length, self.encoding_size * 2)
-        )  
+        )
 
     def test_mask(self):
         result = self.model.predict(self.data)
         np.testing.assert_array_almost_equal(
             result[:, 1:, :],
             np.zeros((
-                self.batch_size, 
-                self.max_length - 1, 
+                self.batch_size,
+                self.max_length - 1,
                 self.encoding_size * 2
             ))
         )
@@ -62,7 +62,7 @@ class TestBidirectionalEncoder(TestCase):
                     result[:, 0:1, self.encoding_size:],
                     np.zeros((self.batch_size, 1, self.encoding_size))
                 )
-            ), 
+            ),
             True
         )
 
