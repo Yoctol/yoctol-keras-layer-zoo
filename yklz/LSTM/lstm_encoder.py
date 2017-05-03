@@ -21,7 +21,7 @@ class LSTMEncoder(LSTMCell):
                  bias_constraint=None,
                  dropout=0.,
                  recurrent_dropout=0.,
-                 use_output_bias=True, 
+                 use_output_bias=True,
                  output_activation='tanh',
                  output_dropout=0.,
                  **kwargs):
@@ -54,8 +54,8 @@ class LSTMEncoder(LSTMCell):
         inputs_shape = K.shape(inputs)
         zeros = tf.zeros(
             shape=[
-                inputs_shape[0], 
-                inputs_shape[1] - 1, 
+                inputs_shape[0],
+                inputs_shape[1] - 1,
                 self.units
             ]
         )
@@ -66,7 +66,7 @@ class LSTMEncoder(LSTMCell):
             training=training
         )
         outputs = K.reshape(
-            tf.slice(outputs, [0, inputs_shape[1] - 1,0], [-1, 1, -1]), 
+            tf.slice(outputs, [0, inputs_shape[1] - 1,0], [-1, 1, -1]),
             shape=(inputs_shape[0], 1, self.units)
         )
         outputs = K.concatenate([outputs, zeros], axis=1)

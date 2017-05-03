@@ -5,11 +5,11 @@ import numpy as np
 from keras.models import Input, Model
 from keras.layers import Conv2D
 
-from yklz import Mask2D 
+from yklz import Mask2D
 from test import TestBase2DClass
 
 class TestMask2DClass(TestBase2DClass, TestCase):
-    
+
     def setUp(self):
         super(TestMask2DClass, self).setUp()
         self.model = self.create_model()

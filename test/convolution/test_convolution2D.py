@@ -22,7 +22,7 @@ class TestConvolution2DClass(TestBase2DClass, TestCase):
         inputs = Input(shape=(self.x, self.y, self.channel_size))
         masked_inputs = Mask2D(self.mask_value)(inputs)
         outputs = Convolution2D(
-            self.filters, 
+            self.filters,
             self.kernel,
             self.stride
         )(masked_inputs)
@@ -37,9 +37,9 @@ class TestConvolution2DClass(TestBase2DClass, TestCase):
         self.assertEqual(
             result.shape,
             (
-                self.batch_size, 
-                x_window_length, 
-                y_window_length, 
+                self.batch_size,
+                x_window_length,
+                y_window_length,
                 self.filters
             )
         )

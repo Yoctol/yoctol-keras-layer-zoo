@@ -39,7 +39,7 @@ class Convolution2D(Conv2D):
             **kwargs
         )
         self.supports_masking = True
-  
+
     def build(self, input_shape):
         super(Convolution2D, self).build(input_shape)
         mask_kernel_shape = self.kernel_size + (1, 1)
@@ -73,8 +73,8 @@ class Convolution2D(Conv2D):
             self.strides,
             self.padding,
             self.data_format,
-            self.dilation_rate            
+            self.dilation_rate
         )
         mask_output = K.repeat_elements(mask_output, self.filters, 3)
         return outputs * mask_output
- 
+

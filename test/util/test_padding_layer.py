@@ -16,16 +16,16 @@ class TestPaddingZero(TestCase):
         self.batch_size = 100
 
         self.data = np.random.rand(
-            self.batch_size, 
-            self.max_length, 
+            self.batch_size,
+            self.max_length,
             self.feature_size
         )
         self.model = self.create_model()
-        
+
     def create_model(self):
         inputs = Input(
             shape=(
-                self.max_length, 
+                self.max_length,
                 self.feature_size
             )
         )
@@ -39,7 +39,7 @@ class TestPaddingZero(TestCase):
 
         model = Model(inputs, outputs)
         model.compile('sgd', 'mean_squared_error')
-        return model 
+        return model
 
     def test_output_shape(self):
         result = self.model.predict(self.data)
@@ -53,9 +53,9 @@ class TestPaddingZero(TestCase):
         np.testing.assert_array_almost_equal(
             result[:, 1:, :],
             np.zeros((
-                self.batch_size, 
-                self.max_length - 1, 
+                self.batch_size,
+                self.max_length - 1,
                 self.encoding_size
             ))
         )
-        
+

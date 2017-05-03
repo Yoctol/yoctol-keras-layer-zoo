@@ -21,7 +21,7 @@ class LSTMDecoder(LSTMCell):
                  bias_constraint=None,
                  dropout=0.,
                  recurrent_dropout=0.,
-                 use_output_bias=True, 
+                 use_output_bias=True,
                  output_activation='tanh',
                  output_dropout=0.,
                  **kwargs):
@@ -52,17 +52,17 @@ class LSTMDecoder(LSTMCell):
 
     def step(self, inputs, states):
         y_tm1 = states[0]
-        
+
         inputs_sum = tf.reduce_sum(inputs)
-        
+
         def inputs_f(): return inputs
         def output_f(): return y_tm1
         current_inputs = tf.case(
-            [(tf.equal(inputs_sum, 0.0), output_f)], 
+            [(tf.equal(inputs_sum, 0.0), output_f)],
             default=inputs_f
         )
 
         return super(LSTMDecoder, self).step(
             current_inputs,
             states
-        )        
+        )

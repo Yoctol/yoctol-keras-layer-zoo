@@ -26,27 +26,27 @@ class TestLSTMBaseClass(object):
             return_sequences=True
         )(masked_inputs)
         model = Model(inputs, outputs)
-        model.compile('sgd', 'mean_squared_error') 
+        model.compile('sgd', 'mean_squared_error')
         return model
 
     def test_output_shape(self):
         result = self.model.predict(self.data)
         self.assertEqual(
-            result.shape, 
+            result.shape,
             (self.data_size, self.max_length, self.encoding_size)
         )
 
     def test_training(self):
         self.model.fit(
-            self.data, 
-            self.y, 
-            epochs=2, 
+            self.data,
+            self.y,
+            epochs=2,
             validation_split=0.1,
             batch_size=10
         )
         result = self.model.predict(self.data)
         self.assertEqual(
-            result.shape, 
+            result.shape,
             (self.data_size, self.max_length, self.encoding_size)
         )
 
@@ -55,4 +55,4 @@ class TestLSTMBaseClass(object):
         np.testing.assert_array_almost_equal(
             result[:, self.mask_start_point - 1, :],
             result[:, -1, :]
-        ) 
+        )

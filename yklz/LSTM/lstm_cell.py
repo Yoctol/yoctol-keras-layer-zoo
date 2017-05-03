@@ -6,7 +6,7 @@ import keras.backend as K
 from .lstm_peephole import LSTMPeephole
 
 class LSTMCell(LSTMPeephole):
-    def __init__(self, units, 
+    def __init__(self, units,
                  activation='tanh',
                  recurrent_activation='hard_sigmoid',
                  use_bias=True,
@@ -23,7 +23,7 @@ class LSTMCell(LSTMPeephole):
                  bias_constraint=None,
                  dropout=0.,
                  recurrent_dropout=0.,
-                 use_output_bias=True, 
+                 use_output_bias=True,
                  output_activation='tanh',
                  output_dropout=0.,
                  **kwargs):
@@ -110,7 +110,7 @@ class LSTMCell(LSTMPeephole):
         out_dp_mask = states[5]
 
         h, new_states = super(LSTMCell, self).step(
-            inputs, 
+            inputs,
             [h_tm1, c_tm1, dp_mask, rec_dp_mask]
         )
         _, c = new_states

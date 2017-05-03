@@ -22,7 +22,7 @@ class Mask2D(Masking):
         masked_tensor = self.compute_mask(inputs)
         masked_tensor = K.expand_dims(masked_tensor)
         masked_tensor = K.repeat_elements(
-            masked_tensor, 
+            masked_tensor,
             inputs_shape[3],
             3
         )
