@@ -15,6 +15,7 @@ from .pooling.mask_max2D_pooling import MaskedMax2DPooling
 
 '''Utility Layers'''
 from .util.padding_layer import PaddingZero
+from .util.flatten import MaskFlatten
 
 '''Wrapper Layers'''
 from .wrapper.bidirectional import Bidirectional_Encoder
