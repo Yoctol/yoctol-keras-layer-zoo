@@ -6,6 +6,7 @@ from .LSTM.lstm_cell import LSTMCell
 
 '''Customed convolution layers'''
 from .convolution.convolution2D import Convolution2D
+from .convolution.convEncoder import ConvEncoder
 
 '''Customed masking layers'''
 from .masking.mask2D import Mask2D
@@ -19,3 +20,4 @@ from .util.flatten import MaskFlatten
 
 '''Wrapper Layers'''
 from .wrapper.bidirectional import Bidirectional_Encoder
+from .wrapper.mask_to_seq import MaskToSeq
