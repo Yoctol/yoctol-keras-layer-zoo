@@ -1,1 +1,1 @@
-from .bidirectional import Bidirectional_Encoder
+from .bidirectional_rnn_encoder import BidirectionalRNNEncoder
