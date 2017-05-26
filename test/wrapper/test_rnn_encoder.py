@@ -1,4 +1,4 @@
-'''LSTM Encoder test case'''
+'''RNN Encoder test case'''
 from unittest import TestCase
 
 import numpy as np

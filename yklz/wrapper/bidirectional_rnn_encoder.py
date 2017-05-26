@@ -2,8 +2,20 @@ import inspect
 
 import keras.backend as K
 from keras.layers.wrappers import Bidirectional
+import tensorflow as tf
 
-class Bidirectional_Encoder(Bidirectional):
+class BidirectionalRNNEncoder(Bidirectional):
+
+    def build(self, input_shape):
+        if not self.forward_layer.return_sequences:
+            raise ValueError(
+                'Recurrent Units in Encoder must return '
+                'sequences to provide mask function'
+            )
+
+        super(BidirectionalRNNEncoder, self).build(
+            input_shape
+        )
 
     def call(self, inputs, training=None, mask=None):
         kwargs = {}
@@ -33,4 +45,20 @@ class Bidirectional_Encoder(Bidirectional):
                     out._uses_learning_phase = True
             else:
                 output._uses_learning_phase = True
-        return output
+
+        units = self.forward_layer.units
+        if self.merge_mode == 'concat' or self.merge_mode is None:
+            units *= 2
+        inputs_shape = K.shape(inputs)
+        zeros = tf.zeros(
+            shape=[
+                inputs_shape[0],
+                inputs_shape[1] - 1,
+                units
+            ]
+        )
+        output = K.reshape(
+            tf.slice(output, [0, inputs_shape[1] - 1,0], [-1, 1, -1]),
+            shape=(inputs_shape[0], 1, units)
+        )
+        return K.concatenate([output, zeros], axis=1)

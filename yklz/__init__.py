@@ -19,6 +19,6 @@ from .util.padding_layer import PaddingZero
 from .util.flatten import MaskFlatten
 
 '''Wrapper Layers'''
-from .wrapper.bidirectional import Bidirectional_Encoder
+from .wrapper.bidirectional_rnn_encoder import BidirectionalRNNEncoder
 from .wrapper.mask_to_seq import MaskToSeq
 from .wrapper.rnn_encoder import RNNEncoder
