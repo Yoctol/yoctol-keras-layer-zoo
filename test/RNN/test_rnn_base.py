@@ -1,11 +1,11 @@
-'''LSTM base test case'''
+'''RNN base test case'''
 from unittest import TestCase
 
 import numpy as np
 from keras.models import Model, Input
 from keras.layers.core import Masking
 
-class TestLSTMBaseClass(object):
+class TestRNNBaseClass(object):
 
     def setUp(self):
         self.max_length = 10
@@ -18,10 +18,10 @@ class TestLSTMBaseClass(object):
         self.data[:, self.mask_start_point:, :] = 0.0
         self.y = np.random.rand(self.data_size, self.max_length, self.encoding_size)
 
-    def create_model(self, LSTMLayer):
+    def create_model(self, rnn_layer):
         inputs = Input(shape=(self.max_length, self.feature_size))
         masked_inputs = Masking(0.0)(inputs)
-        outputs = LSTMLayer(
+        outputs = rnn_layer(
             self.encoding_size,
             return_sequences=True
         )(masked_inputs)

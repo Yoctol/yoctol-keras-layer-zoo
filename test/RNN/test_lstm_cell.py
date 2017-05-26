@@ -2,9 +2,9 @@
 from unittest import TestCase
 
 from yklz import LSTMCell
-from .test_lstm_base import TestLSTMBaseClass
+from .test_rnn_base import TestRNNBaseClass
 
-class TestLSTMCellClass(TestLSTMBaseClass, TestCase):
+class TestLSTMCellClass(TestRNNBaseClass, TestCase):
 
     def setUp(self):
         super(TestLSTMCellClass, self).setUp()

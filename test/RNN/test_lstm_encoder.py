@@ -6,9 +6,9 @@ from keras.models import Model, Input
 from keras.layers.core import Masking
 
 from yklz import LSTMEncoder
-from .test_lstm_base import TestLSTMBaseClass
+from .test_rnn_base import TestRNNBaseClass
 
-class TestLSTMEncoderClass(TestLSTMBaseClass, TestCase):
+class TestLSTMEncoderClass(TestRNNBaseClass, TestCase):
 
     def setUp(self):
         super(TestLSTMEncoderClass, self).setUp()
