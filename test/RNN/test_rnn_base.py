@@ -1,11 +1,12 @@
-'''LSTM base test case'''
+'''RNN base test case'''
 from unittest import TestCase
 
 import numpy as np
+import keras.backend as K
 from keras.models import Model, Input
 from keras.layers.core import Masking
 
-class TestLSTMBaseClass(object):
+class TestRNNBaseClass(object):
 
     def setUp(self):
         self.max_length = 10
@@ -18,10 +19,10 @@ class TestLSTMBaseClass(object):
         self.data[:, self.mask_start_point:, :] = 0.0
         self.y = np.random.rand(self.data_size, self.max_length, self.encoding_size)
 
-    def create_model(self, LSTMLayer):
+    def create_model(self, rnn_layer):
         inputs = Input(shape=(self.max_length, self.feature_size))
         masked_inputs = Masking(0.0)(inputs)
-        outputs = LSTMLayer(
+        outputs = rnn_layer(
             self.encoding_size,
             return_sequences=True
         )(masked_inputs)
@@ -50,9 +51,19 @@ class TestLSTMBaseClass(object):
             (self.data_size, self.max_length, self.encoding_size)
         )
 
-    def test_mask(self):
+    def test_mask_function(self):
         result = self.model.predict(self.data)
         np.testing.assert_array_almost_equal(
             result[:, self.mask_start_point - 1, :],
             result[:, -1, :]
         )
+
+    def test_mask(self):
+        mask_cache_key = str(id(self.model.input)) + '_' + str(id(None))
+        mask_tensor = self.model._output_mask_cache[mask_cache_key]
+        mask = mask_tensor.eval(
+            session=K.get_session(),
+            feed_dict={self.model.input: self.data}
+        )
+        self.assertFalse(np.any(mask[:, self.mask_start_point:]))
+        self.assertTrue(np.all(mask[:, :self.mask_start_point]))
