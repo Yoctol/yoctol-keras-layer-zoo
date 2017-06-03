@@ -22,3 +22,4 @@ from .util.flatten import MaskFlatten
 from .wrapper.bidirectional_rnn_encoder import BidirectionalRNNEncoder
 from .wrapper.mask_to_seq import MaskToSeq
 from .wrapper.rnn_encoder import RNNEncoder
+from .wrapper.rnn_decoder import RNNDecoder

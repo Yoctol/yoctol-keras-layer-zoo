@@ -21,7 +21,6 @@ class TestRNNEncoderBaseClass(TestRNNBaseClass):
         outputs = RNNEncoder(
             rnn_layer(
                 self.encoding_size,
-                return_sequences=True
             )
         )(masked_inputs)
         model = Model(inputs, outputs)
