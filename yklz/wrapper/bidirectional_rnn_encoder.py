@@ -7,12 +7,10 @@ import tensorflow as tf
 class BidirectionalRNNEncoder(Bidirectional):
 
     def build(self, input_shape):
-        if not self.forward_layer.return_sequences:
-            raise ValueError(
-                'Recurrent Units in Encoder must return '
-                'sequences to provide mask function'
-            )
-
+        self.forward_layer.return_sequences = True
+        self.backward_layer.return_sequences = True
+        self.return_sequences = True
+        self.layer.return_sequences = True
         super(BidirectionalRNNEncoder, self).build(
             input_shape
         )
