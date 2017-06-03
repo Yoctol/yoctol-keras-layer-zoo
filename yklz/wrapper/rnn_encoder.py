@@ -15,12 +15,19 @@ class RNNEncoder(Wrapper):
         self.supports_masking = True
 
     def build(self, input_shape):
+        self.layer.return_sequences = True
         self.layer.build(input_shape)
         super(RNNEncoder, self).build(input_shape)
 
     def compute_output_shape(self, input_shape):
         return self.layer.compute_output_shape(
             input_shape
+        )
+
+    def compute_mask(self, inputs, mask):
+        return self.layer.compute_mask(
+            inputs=inputs,
+            mask=mask,
         )
 
     def call(self, inputs, mask=None, initial_state=None, training=None):
