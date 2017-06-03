@@ -20,9 +20,8 @@ class TestBidirectionalRNNEncoderBaseClass(TestRNNBaseClass):
         inputs = Input(shape=(self.max_length, self.feature_size))
         masked_inputs = Masking(0.0)(inputs)
         outputs = BidirectionalRNNEncoder(
-            LSTMCell(
+            rnn_layer(
                 self.cell_units,
-                return_sequences=True
             )
         )(masked_inputs)
         model = Model(inputs, outputs)
