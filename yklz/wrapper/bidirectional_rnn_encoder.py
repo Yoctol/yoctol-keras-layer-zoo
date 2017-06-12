@@ -17,7 +17,7 @@ class BidirectionalRNNEncoder(Bidirectional):
 
     def call(self, inputs, training=None, mask=None):
         kwargs = {}
-        func_args = inspect.getargspec(self.layer.call).args
+        func_args = inspect.getfullargspec(self.layer.call).args
         if 'training' in func_args:
             kwargs['training'] = training
         if 'mask' in func_args:
