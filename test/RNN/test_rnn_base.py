@@ -1,5 +1,6 @@
 '''RNN base test case'''
 from unittest import TestCase
+from unittest.mock import patch
 
 import numpy as np
 import keras.backend as K
@@ -45,7 +46,8 @@ class TestRNNBaseClass(object):
             (self.data_size, self.max_length, self.encoding_size)
         )
 
-    def test_training(self):
+    @patch('keras.models.Model.fit')
+    def test_training(self, patch_fit):
         self.model.fit(
             self.data,
             self.y,
