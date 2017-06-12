@@ -16,7 +16,7 @@ The mask function is used to deal with unfixed length of natural language senten
 
 * Convolutional Neural Network
 
-    * Masked 2D Convolutional layer
+    * MaskConvNet
     * MaskConv
     * MaskPooling 
     * MaskFlatten 
@@ -173,6 +173,8 @@ That's why we pad zero vectors after the encoded vector in RNN Encoder.
 
 ### Convolutional Neural Network
 
+Note we use channel last data format with our ConvNet layers.
+
 #### MaskConv
 
 A masking layer masks 2D, 3D or higher dimensional input tensors.
@@ -211,8 +213,31 @@ pooling_outputs = MaskPooling(
     pool_mode='max'
 )(masked_inputs)
 ```
+#### MaskConvNet
 
-#### 2D ConvNet
+A wrapper supports mask function with Keras convolutional layers.
+
+* Usage
+
+```python
+from keras.models import Model, Input
+from keras.layers import Conv2D
+
+from yklz import MaskConv
+from yklz import MaskConvNet
+
+inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
+masked_inputs = MaskConv(0.0)(inputs)
+conv_outputs = MaskConvNet(
+    Conv2D(
+        filters,
+        kernel,
+        strides=strides
+    )
+)(masked_inputs)
+```
+
+#### 2D masked ConvNet model
 
 Use convolutional neural network to extract text features and make prediction.
 
@@ -222,16 +247,21 @@ Use convolutional neural network to extract text features and make prediction.
 from keras.models import Model, Input
 from keras.layers import Dense
 from keras.layers.pooling import MaxPool2D
-from yklz import MaskConv, Convolution2D
+from keras.layers import Conv2D
+
+from yklz import MaskConv
+from yklz import MaskConvNet
 from yklz import MaskPooling
 from yklz import MaskFlatten
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
 masked_inputs = MaskConv(0.0)(inputs)
-conv_outputs = Convolution2D(
-    filters,
-    kernel,
-    strides
+conv_outputs = MaskConvNet(
+    Conv2D(
+        filters,
+        kernel,
+        strides=strides
+    )
 )(masked_inputs)
 pooling_outputs = MaskPooling(
     MaxPool2D(
@@ -263,7 +293,10 @@ with the mask tensor from MaskToSeq wrapper.
 from keras.models import Model, Input
 from keras.layers import LSTM
 from keras.layers.pooling import MaxPool2D
-from yklz import MaskConv, Convolution2D
+from keras.layers import Conv2D
+
+from yklz import MaskConv
+from yklz import MaskConvNet
 from yklz import MaskPooling
 from yklz import RNNDecoder, MaskToSeq
 
@@ -273,10 +306,12 @@ masked_seq = MaskToSeq(
     layer=MaskConv(0.0),
     time_axis=1,
 )(inputs)
-conv_outputs = Convolution2D(
-    filters,
-    kernel,
-    strides
+conv_outputs = MaskConvNet(
+    Conv2D(
+        filters,
+        kernel,
+        strides=strides
+    )
 )(masked_inputs)
 pooling_outputs = MaskPooling(
     MaxPool2D(

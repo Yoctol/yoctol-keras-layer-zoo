@@ -6,8 +6,9 @@ import keras.backend as K
 from keras.models import Input, Model
 from keras.utils.conv_utils import conv_output_length
 from keras.layers.pooling import MaxPool2D
+from keras.layers import Conv2D
 
-from yklz import MaskConv, Convolution2D
+from yklz import MaskConv, MaskConvNet
 from yklz import MaskPooling, MaskToSeq
 from yklz import ConvEncoder
 
@@ -60,10 +61,12 @@ class TestConvEncoderClass(TestSeq2DClass, TestCase):
         inputs = Input(shape=(self.x, self.y, self.channel_size))
         masked_inputs = MaskConv(self.mask_value)(inputs)
         masked_seq = MaskToSeq(MaskConv(self.mask_value))(inputs)
-        conv_outputs = Convolution2D(
-            self.filters,
-            self.kernel,
-            self.strides
+        conv_outputs = MaskConvNet(
+            Conv2D(
+                self.filters,
+                self.kernel,
+                strides=self.strides,
+            )
         )(masked_inputs)
         pooling_outputs = MaskPooling(
             MaxPool2D(
