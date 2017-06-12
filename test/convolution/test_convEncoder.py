@@ -6,7 +6,7 @@ import keras.backend as K
 from keras.models import Input, Model
 from keras.utils.conv_utils import conv_output_length
 
-from yklz import Mask2D, Convolution2D
+from yklz import MaskConv, Convolution2D
 from yklz import MaskedMax2DPooling, MaskToSeq
 from yklz import ConvEncoder
 
@@ -57,8 +57,8 @@ class TestConvEncoderClass(TestSeq2DClass, TestCase):
 
     def create_model(self):
         inputs = Input(shape=(self.x, self.y, self.channel_size))
-        masked_inputs = Mask2D(self.mask_value)(inputs)
-        masked_seq = MaskToSeq(Mask2D(self.mask_value))(inputs)
+        masked_inputs = MaskConv(self.mask_value)(inputs)
+        masked_seq = MaskToSeq(MaskConv(self.mask_value))(inputs)
         conv_outputs = Convolution2D(
             self.filters,
             self.kernel,

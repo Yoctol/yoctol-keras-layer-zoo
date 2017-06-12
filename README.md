@@ -17,7 +17,7 @@ The mask function is used to deal with unfixed length of natural language senten
 * Convolutional Neural Network
 
     * 2D Convolutional layer
-    * Mask2D layer
+    * MaskConv layer
     * Masked MaxPooling2D layer 
     * MaskFlatten layer
     * ConvEncoder layer transforms 2D or 3D tensor into 3D timestamp sequence.
@@ -182,12 +182,12 @@ Use convolutional neural network to extract text features and make prediction.
 ```python
 from keras.models import Model, Input
 from keras.layers import Dense
-from yklz import Mask2D, Convolution2D
+from yklz import MaskConv, Convolution2D
 from yklz import MaskedMax2DPooling
 from yklz import MaskFlatten
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
-masked_inputs = Mask2D(0.0)(inputs)
+masked_inputs = MaskConv(0.0)(inputs)
 conv_outputs = Convolution2D(
     filters,
     kernel,
@@ -219,14 +219,14 @@ with the mask tensor from MaskToSeq wrapper.
 ```python
 from keras.models import Model, Input
 from keras.layers import LSTM
-from yklz import Mask2D, Convolution2D
+from yklz import MaskConv, Convolution2D
 from yklz import MaskedMax2DPooling
 from yklz import RNNDecoder, MaskToSeq
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
-masked_inputs = Mask2D(0.0)(inputs)
+masked_inputs = MaskConv(0.0)(inputs)
 masked_seq = MaskToSeq(
-    layer=Mask2D(0.0),
+    layer=MaskConv(0.0),
     time_axis=1,
 )(inputs)
 conv_outputs = Convolution2D(

@@ -5,7 +5,7 @@ import numpy as np
 from keras.models import Input, Model
 
 from yklz import Convolution2D
-from yklz import Mask2D
+from yklz import MaskConv
 from test import TestConvBase2DClass
 
 class TestConvolution2DClass(TestConvBase2DClass, TestCase):
@@ -17,7 +17,7 @@ class TestConvolution2DClass(TestConvBase2DClass, TestCase):
 
     def create_model(self):
         inputs = Input(shape=(self.x, self.y, self.channel_size))
-        masked_inputs = Mask2D(self.mask_value)(inputs)
+        masked_inputs = MaskConv(self.mask_value)(inputs)
         outputs = Convolution2D(
             self.filters,
             self.kernel,
