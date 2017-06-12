@@ -148,6 +148,8 @@ vector as input vector.
 
 That's why we pad zero vectors after the encoded vector in RNN Encoder.
 
+Note that your encoding size should be the same with the decoding size.
+
  * Usage:
  
  ```python
@@ -256,6 +258,7 @@ from yklz import MaskFlatten
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
 masked_inputs = MaskConv(0.0)(inputs)
+
 conv_outputs = MaskConvNet(
     Conv2D(
         filters,
@@ -271,15 +274,17 @@ pooling_outputs = MaskPooling(
     ),
     pool_mode='max'
 )(conv_outputs)
+
 flatten_outputs = MaskFlatten()(pooling_outputs)
 outputs = Dense(
     label_num
 )(flatten_outputs)
+
 model = Model(inputs, outputs)
 model.compile('sgd', 'mean_squared_error')
 ```
 
-### ConvNet to RNN seq2seq model
+### ConvNet to RNN seq2seq model 
 
 Encode text features with ConvNet and decode it with RNN.
 
@@ -287,6 +292,8 @@ MaskToSeq is a wrapper transform 2D or 3D mask tensor into timestamp mask tensor
 
 ConvEncoder transforms a 2D or 3D tensor into a 3D timestamp sequence and mask the sequence 
 with the mask tensor from MaskToSeq wrapper.
+
+#### Auto-encoder example
 
 * Usage
 ```python
@@ -306,6 +313,7 @@ masked_seq = MaskToSeq(
     layer=MaskConv(0.0),
     time_axis=1,
 )(inputs)
+
 conv_outputs = MaskConvNet(
     Conv2D(
         filters,
@@ -321,9 +329,60 @@ pooling_outputs = MaskPooling(
     ),
     pool_mode='max'
 )(conv_outputs)
+
 encoded = ConvEncoder()(
     [pooling_outputs, masked_seq]
 )
+
+outputs = RNNDecoder(
+    LSTM(
+        units=decoding_size
+    )
+)(encoded)
+model = Model(inputs, outputs)
+model.compile('sgd', 'mean_squared_error')
+```
+
+#### Seq2Seq example
+
+* Usage
+```python
+from keras.models import Model, Input
+from keras.layers import LSTM
+from keras.layers.pooling import MaxPool2D
+from keras.layers import Conv2D
+from keras.layers import Masking
+
+from yklz import MaskConv
+from yklz import MaskConvNet
+from yklz import MaskPooling
+from yklz import RNNDecoder
+
+input_seq = Input(shape=(input_seq_max_length, word_embedding_size, channel_size))
+output_seq = Input(shape=(output_seq_max_length, word_embedding_size))
+masked_inputs = MaskConv(0.0)(input_seq)
+masked_outputs = Masking(0.0)(output_seq)
+
+conv_outputs = MaskConvNet(
+    Conv2D(
+        filters,
+        kernel,
+        strides=strides
+    )
+)(masked_inputs)
+pooling_outputs = MaskPooling(
+    MaxPool2D(
+        pooling_kernel,
+        pooling_strides,
+        pooling_padding,
+    ),
+    pool_mode='max'
+)(conv_outputs)
+
+encoded = ConvEncoder()(
+    [pooling_outputs, masked_outputs]
+)
+
 outputs = RNNDecoder(
     LSTM(
         units=decoding_size
