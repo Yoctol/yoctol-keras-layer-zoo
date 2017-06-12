@@ -4,10 +4,9 @@ from unittest import TestCase
 import numpy as np
 import keras.backend as K
 from keras.models import Input, Model
-from keras.utils.conv_utils import conv_output_length
 
-from yklz import MaskConv, Convolution2D
-from yklz import MaskedMax2DPooling, MaskToSeq
+from yklz import MaskConv
+from yklz import MaskToSeq
 from test import TestBase2DClass
 
 class TestMaskToSeq2DClass(TestBase2DClass, TestCase):

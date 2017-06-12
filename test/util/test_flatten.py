@@ -5,8 +5,9 @@ import numpy as np
 import keras.backend as K
 from keras.models import Input, Model
 from keras.utils.conv_utils import conv_output_length
+from keras.layers.pooling import MaxPool2D
 
-from yklz import Convolution2D, MaskedMax2DPooling
+from yklz import Convolution2D, MaskPooling
 from yklz import MaskConv, MaskFlatten
 from test import TestBase2DClass
 
@@ -47,10 +48,12 @@ class TestMaskFlattenClass(TestBase2DClass, TestCase):
             self.kernel,
             self.strides
         )(masked_inputs)
-        pooling_outputs = MaskedMax2DPooling(
-            self.mask_kernel,
-            self.mask_strides,
-            self.padding,
+        pooling_outputs = MaskPooling(
+            MaxPool2D(
+                self.mask_kernel,
+                self.mask_strides,
+                self.padding,
+            )
         )(conv_outputs)
         outputs = MaskFlatten()(pooling_outputs)
         model = Model(inputs, outputs)

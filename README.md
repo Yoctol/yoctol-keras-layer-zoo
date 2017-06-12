@@ -10,17 +10,17 @@ The mask function is used to deal with unfixed length of natural language senten
 * Recurrent Neural Network
   
     * LSTM Peephole 
-    * RNN Encoder wrapper 
-    * Bidirectional RNN Encoder wrapper
-    * RNN Decoder wrapper
+    * RNN Encoder
+    * RNN Decoder
+    * Bidirectional RNN Encoder
 
 * Convolutional Neural Network
 
-    * 2D Convolutional layer
-    * MaskConv layer
-    * Masked MaxPooling2D layer 
-    * MaskFlatten layer
-    * ConvEncoder layer transforms 2D or 3D tensor into 3D timestamp sequence.
+    * Masked 2D Convolutional layer
+    * MaskConv
+    * MaskPooling 
+    * MaskFlatten 
+    * ConvEncoder
 
 ## Installation
 
@@ -173,6 +173,45 @@ That's why we pad zero vectors after the encoded vector in RNN Encoder.
 
 ### Convolutional Neural Network
 
+#### MaskConv
+
+A masking layer masks 2D, 3D or higher dimensional input tensors.
+
+* Usage
+
+```python
+from keras.models import Model, Input
+from yklz import MaskConv
+
+inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
+masked_inputs = MaskConv(0.0)(inputs)
+```
+
+#### MaskPooling
+
+A pooling wrapper supports mask function with Keras pooling layers.
+
+* Usage
+
+```python
+from keras.models import Model, Input
+from keras.layers.pooling import MaxPool2D
+
+from yklz import MaskConv
+from yklz import MaskPooling
+
+inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
+masked_inputs = MaskConv(0.0)(inputs)
+pooling_outputs = MaskPooling(
+    MaxPool2D(
+        pooling_kernel,
+        pooling_strides,
+        pooling_padding,
+    ),
+    pool_mode='max'
+)(masked_inputs)
+```
+
 #### 2D ConvNet
 
 Use convolutional neural network to extract text features and make prediction.
@@ -182,8 +221,9 @@ Use convolutional neural network to extract text features and make prediction.
 ```python
 from keras.models import Model, Input
 from keras.layers import Dense
+from keras.layers.pooling import MaxPool2D
 from yklz import MaskConv, Convolution2D
-from yklz import MaskedMax2DPooling
+from yklz import MaskPooling
 from yklz import MaskFlatten
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
@@ -193,10 +233,13 @@ conv_outputs = Convolution2D(
     kernel,
     strides
 )(masked_inputs)
-pooling_outputs = MaskedMax2DPooling(
-    pooling_kernel,
-    pooling_strides,
-    pooling_padding,
+pooling_outputs = MaskPooling(
+    MaxPool2D(
+        pooling_kernel,
+        pooling_strides,
+        pooling_padding,
+    ),
+    pool_mode='max'
 )(conv_outputs)
 flatten_outputs = MaskFlatten()(pooling_outputs)
 outputs = Dense(
@@ -212,15 +255,16 @@ Encode text features with ConvNet and decode it with RNN.
 
 MaskToSeq is a wrapper transform 2D or 3D mask tensor into timestamp mask tensor.
 
-ConvEncoder transforms 2D or 3D tensor into 3D timestamp sequence and mask the sequence 
+ConvEncoder transforms a 2D or 3D tensor into a 3D timestamp sequence and mask the sequence 
 with the mask tensor from MaskToSeq wrapper.
 
 * Usage
 ```python
 from keras.models import Model, Input
 from keras.layers import LSTM
+from keras.layers.pooling import MaxPool2D
 from yklz import MaskConv, Convolution2D
-from yklz import MaskedMax2DPooling
+from yklz import MaskPooling
 from yklz import RNNDecoder, MaskToSeq
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
@@ -234,10 +278,13 @@ conv_outputs = Convolution2D(
     kernel,
     strides
 )(masked_inputs)
-pooling_outputs = MaskedMax2DPooling(
-    pooling_kernel,
-    pooling_strides,
-    pooling_padding,
+pooling_outputs = MaskPooling(
+    MaxPool2D(
+        pooling_kernel,
+        pooling_strides,
+        pooling_padding,
+    ),
+    pool_mode='max'
 )(conv_outputs)
 encoded = ConvEncoder()(
     [pooling_outputs, masked_seq]
