@@ -9,7 +9,7 @@ from .convolution.convolution2D import Convolution2D
 from .convolution.convEncoder import ConvEncoder
 
 '''Customed masking layers'''
-from .masking.mask2D import Mask2D
+from .masking.maskConv import MaskConv
 
 '''Customed pooling layers'''
 from .pooling.mask_max2D_pooling import MaskedMax2DPooling
