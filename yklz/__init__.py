@@ -12,7 +12,7 @@ from .convolution.convEncoder import ConvEncoder
 from .masking.maskConv import MaskConv
 
 '''Customed pooling layers'''
-from .pooling.mask_max2D_pooling import MaskedMax2DPooling
+from .pooling.mask_pooling import MaskPooling
 
 '''Utility Layers'''
 from .util.padding_layer import PaddingZero
