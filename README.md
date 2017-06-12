@@ -26,9 +26,9 @@ The mask function is used to deal with unfixed length of natural language senten
 
 `pip install yoctol_keras_layer_zoo`
 
-### Note! We use tensorflow backend while using keras. 
-### Please install tensorflow by yourself. 
-### Either tensorflow-gpu or tensorflow is fine.
+#### Note! We use tensorflow backend while using keras. 
+#### Please install tensorflow by yourself. 
+#### Either tensorflow-gpu or tensorflow is fine.
 
   * Install tensorflow with GPU version.
 
@@ -153,7 +153,7 @@ That's why we pad zero vectors after the encoded vector in RNN Encoder.
  ```python
  from keras.models import Model, Input
  from keras.layers import LSTM, Masking
- from yklz import LSTMEncoder, LSTMDecoder
+ from yklz import RNNEncoder, RNNDecoder
  
  inputs = Input(shape=(max_length, feature_size))
  masked_inputs = Masking(0.0)(inputs)
