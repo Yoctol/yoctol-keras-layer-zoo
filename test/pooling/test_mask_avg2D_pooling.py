@@ -1,4 +1,4 @@
-'''Masked Max2D pooling testcase'''
+'''Masked Avg2D pooling testcase'''
 from unittest import TestCase
 
 import numpy as np
@@ -10,9 +10,9 @@ from yklz import MaskPooling
 from yklz import MaskConv
 from test import TestConvBase2DClass
 
-class TestMaskedMax2DPoolingClass(TestConvBase2DClass, TestCase):
+class TestMaskedAvg2DPoolingClass(TestConvBase2DClass, TestCase):
     def setUp(self):
-        super(TestMaskedMax2DPoolingClass, self).setUp()
+        super(TestMaskedAvg2DPoolingClass, self).setUp()
         self.pool_size = self.kernel
         self.filters = self.channel_size
 
