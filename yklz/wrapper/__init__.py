@@ -1,1 +1,0 @@
-from .bidirectional_rnn_encoder import BidirectionalRNNEncoder
