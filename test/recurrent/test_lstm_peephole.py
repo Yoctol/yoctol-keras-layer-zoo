@@ -8,4 +8,5 @@ class TestLSTMCellClass(TestRNNBaseClass, TestCase):
 
     def setUp(self):
         super(TestLSTMCellClass, self).setUp()
+        self.custom_objects['LSTMPeephole'] = LSTMPeephole
         self.model = self.create_model(LSTMPeephole)

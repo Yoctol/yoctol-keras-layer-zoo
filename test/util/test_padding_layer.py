@@ -3,8 +3,9 @@ from unittest import TestCase
 
 import numpy as np
 from keras.models import Input, Model
+from keras.layers import Dense
 
-from yklz import LSTMCell
+from yklz import LSTMPeephole, RNNCell
 from yklz import PaddingZero
 
 class TestPaddingZero(TestCase):
@@ -14,6 +15,7 @@ class TestPaddingZero(TestCase):
         self.encoding_size = 200
         self.feature_size = 300
         self.batch_size = 100
+        self.hidden_size = 30
 
         self.data = np.random.rand(
             self.batch_size,
@@ -29,9 +31,14 @@ class TestPaddingZero(TestCase):
                 self.feature_size
             )
         )
-        encoded_seq = LSTMCell(
-            self.encoding_size,
-            return_sequences=False
+        encoded_seq = RNNCell(
+            LSTMPeephole(
+                self.hidden_size,
+                return_sequences=False
+            ),
+            Dense(
+                self.encoding_size
+            )
         )(inputs)
         outputs = PaddingZero(
             self.max_length

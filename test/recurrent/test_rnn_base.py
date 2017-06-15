@@ -1,4 +1,5 @@
 '''RNN base test case'''
+import os
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -6,6 +7,7 @@ import numpy as np
 import keras.backend as K
 from keras.models import Model, Input
 from keras.layers.core import Masking
+from keras.models import load_model
 
 class TestRNNBaseClass(object):
 
@@ -27,6 +29,7 @@ class TestRNNBaseClass(object):
             self.max_length,
             self.encoding_size
         )
+        self.custom_objects = {}
 
     def create_model(self, rnn_layer):
         inputs = Input(shape=(self.max_length, self.feature_size))
@@ -77,3 +80,17 @@ class TestRNNBaseClass(object):
         )
         self.assertFalse(np.any(mask[:, self.mask_start_point:]))
         self.assertTrue(np.all(mask[:, :self.mask_start_point]))
+
+    def test_save_load(self):
+        model_name = self.__class__.__name__ + '_temp.model'
+        self.model.save(model_name)
+        self.model = load_model(
+            model_name,
+            custom_objects=self.custom_objects
+        )
+        os.remove(model_name)
+        result = self.model.predict(self.data)
+        self.assertEqual(
+            result.shape,
+            (self.data_size, self.max_length, self.encoding_size)
+        )

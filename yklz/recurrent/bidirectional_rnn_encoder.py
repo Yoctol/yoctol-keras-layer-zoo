@@ -6,11 +6,22 @@ import tensorflow as tf
 
 class BidirectionalRNNEncoder(Bidirectional):
 
+    def __init__(
+        self,
+        layer,
+        merge_mode='concat',
+        weights=None,
+        **kwargs
+    ):
+        layer.return_sequences = True
+        super(BidirectionalRNNEncoder, self).__init__(
+            layer,
+            merge_mode,
+            weights,
+            **kwargs
+        )
+
     def build(self, input_shape):
-        self.forward_layer.return_sequences = True
-        self.backward_layer.return_sequences = True
-        self.return_sequences = True
-        self.layer.return_sequences = True
         super(BidirectionalRNNEncoder, self).build(
             input_shape
         )
@@ -36,14 +47,6 @@ class BidirectionalRNNEncoder(Bidirectional):
         elif self.merge_mode is None:
             output = [y, y_rev]
 
-        # Properly set learning phase
-        if 0 < self.layer.dropout + self.layer.recurrent_dropout:
-            if self.merge_mode is None:
-                for out in output:
-                    out._uses_learning_phase = True
-            else:
-                output._uses_learning_phase = True
-
         units = self.forward_layer.units
         if self.merge_mode == 'concat' or self.merge_mode is None:
             units *= 2
@@ -59,4 +62,13 @@ class BidirectionalRNNEncoder(Bidirectional):
             tf.slice(output, [0, inputs_shape[1] - 1,0], [-1, 1, -1]),
             shape=(inputs_shape[0], 1, units)
         )
-        return K.concatenate([output, zeros], axis=1)
+        output = K.concatenate([output, zeros], axis=1)
+
+        # Properly set learning phase
+        if 0 < self.layer.dropout + self.layer.recurrent_dropout:
+            if self.merge_mode is None:
+                for out in output:
+                    out._uses_learning_phase = True
+            else:
+                output._uses_learning_phase = True
+        return output
