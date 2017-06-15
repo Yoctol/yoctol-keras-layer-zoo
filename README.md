@@ -3,23 +3,24 @@ Customized keras layers used in Yoctol NLU service.
 
 ## Features
 
-Our customed layers support mask function in Keras framework. 
+Our customized layers support mask function in Keras framework. 
 
 The mask function is used to deal with unfixed length of natural language sentences.
 
 * Recurrent Neural Network
   
     * LSTM Peephole 
+    * RNN Cell
     * RNN Encoder
     * RNN Decoder
     * Bidirectional RNN Encoder
 
 * Convolutional Neural Network
 
-    * MaskConvNet
+    * Mask ConvNet
     * MaskConv
-    * MaskPooling 
-    * MaskFlatten 
+    * Mask Pooling 
+    * Mask Flatten 
     * ConvEncoder
 
 ## Installation
@@ -27,16 +28,6 @@ The mask function is used to deal with unfixed length of natural language senten
 `pip install yoctol_keras_layer_zoo`
 
 #### Note! We use tensorflow backend while using keras. 
-#### Please install tensorflow by yourself. 
-#### Either tensorflow-gpu or tensorflow is fine.
-
-  * Install tensorflow with GPU version.
-
-    `pip install tensorflow-gpu`
-
-  * Or install tenserflow with CPU version.
-
-    `pip install tensorflow`
 
 ## Test
 
@@ -69,22 +60,29 @@ The implemented Peephole LSTM outputs its hidden states i.e. h.
  model.compile('sgd', 'mean_squared_error')
  ```
 
-#### LSTM Cell
+#### RNN Cell
 
-The Peephole LSTM with another dense layer behind its hidden states.
+The RNNCell add another Dense layer behind its recurrent layer.
 
  * Usage:
  
  ```python
  from keras.models import Model, Input
  from keras.layers.core import Masking
- from yklz import LSTMCell
+ from keras.layers import LSTM, Dense
+ from yklz import RNNCell
  
  inputs = Input(shape=(max_length, feature_size))
  masked_inputs = Masking(0.0)(inputs)
- outputs = LSTMCell(
-     units=units,
-     return_sequences=True
+ outputs = RNNCell(
+     LSTM(
+         units=hidden_units,
+         return_sequences=True
+     ),
+     Dense(
+         units=units
+     ),
+     dense_dropout=0.1
  )(masked_inputs)
  model = Model(inputs, outputs)
  model.compile('sgd', 'mean_squared_error')
@@ -300,12 +298,13 @@ with the mask tensor from MaskToSeq wrapper.
 from keras.models import Model, Input
 from keras.layers import LSTM
 from keras.layers.pooling import MaxPool2D
-from keras.layers import Conv2D
+from keras.layers import Conv2D, Dense
 
 from yklz import MaskConv
 from yklz import MaskConvNet
 from yklz import MaskPooling
 from yklz import RNNDecoder, MaskToSeq
+from yklz import RNNCell
 
 inputs = Input(shape=(seq_max_length, word_embedding_size, channel_size))
 masked_inputs = MaskConv(0.0)(inputs)
@@ -335,8 +334,13 @@ encoded = ConvEncoder()(
 )
 
 outputs = RNNDecoder(
-    LSTM(
-        units=decoding_size
+    RNNCell(
+        LSTM(
+            units=hidden_size
+        ),
+        Dense(
+            units=decoding_size
+        )
     )
 )(encoded)
 model = Model(inputs, outputs)
@@ -351,12 +355,13 @@ from keras.models import Model, Input
 from keras.layers import LSTM
 from keras.layers.pooling import MaxPool2D
 from keras.layers import Conv2D
-from keras.layers import Masking
+from keras.layers import Masking, Dense
 
 from yklz import MaskConv
 from yklz import MaskConvNet
 from yklz import MaskPooling
 from yklz import RNNDecoder
+from yklz import RNNCell
 
 input_seq = Input(shape=(input_seq_max_length, word_embedding_size, channel_size))
 output_seq = Input(shape=(output_seq_max_length, word_embedding_size))
@@ -384,10 +389,15 @@ encoded = ConvEncoder()(
 )
 
 outputs = RNNDecoder(
-    LSTM(
-        units=decoding_size
+    RNNCell(
+        LSTM(
+            units=hidden_size
+        ),
+        Dense(
+            units=decoding_size
+        )
     )
 )(encoded)
-model = Model(inputs, outputs)
+model = Model([input_seq, output_seq], outputs)
 model.compile('sgd', 'mean_squared_error')
 ```
