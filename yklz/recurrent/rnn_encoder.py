@@ -46,7 +46,7 @@ class RNNEncoder(Wrapper):
             training=training
         )
         outputs = K.reshape(
-            tf.slice(outputs, [0, inputs_shape[1] - 1,0], [-1, 1, -1]),
+            tf.slice(outputs, [0, inputs_shape[1] - 1, 0], [-1, 1, -1]),
             shape=(inputs_shape[0], 1, self.layer.units)
         )
         outputs = K.concatenate([outputs, zeros], axis=1)

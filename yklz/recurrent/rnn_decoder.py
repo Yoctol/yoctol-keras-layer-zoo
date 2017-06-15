@@ -5,17 +5,20 @@ import keras.backend as K
 from keras.layers.wrappers import Wrapper
 import tensorflow as tf
 
+import yklz.backend as YK
+
 class RNNDecoder(Wrapper):
     def __init__(self, layer, **kwargs):
         super(RNNDecoder, self).__init__(
             layer,
             **kwargs
         )
+        self.layer.return_sequences = True
         self.supports_masking = True
 
     def build(self, input_shape):
-        self.layer.return_sequences = True
-        self.layer.build(input_shape)
+        if not self.layer.built:
+            self.layer.build(input_shape)
         super(RNNDecoder, self).build(input_shape)
 
     def compute_output_shape(self, input_shape):
@@ -69,7 +72,8 @@ class RNNDecoder(Wrapper):
                              'or `batch_shape` argument to your Input layer.')
         constants = self.layer.get_constants(inputs, training=None)
         preprocessed_input = self.layer.preprocess_input(inputs, training=None)
-        last_output, outputs, states = K.rnn(self.step,
+        step_function = self.step_with_training(training)
+        last_output, outputs, states = YK.rnn(step_function,
                                              preprocessed_input,
                                              initial_state,
                                              go_backwards=self.layer.go_backwards,
@@ -90,19 +94,28 @@ class RNNDecoder(Wrapper):
 
         return outputs
 
-    def step(self, inputs, states):
-        y_tm1 = states[0]
+    def step_with_training(self, training=None):
 
-        inputs_sum = tf.reduce_sum(inputs)
+        def step(inputs, states):
+            input_shape = K.int_shape(inputs)
+            y_tm1 = self.layer.preprocess_input(
+                K.expand_dims(states[0], axis=1),
+                training
+            )
+            y_tm1 = K.reshape(y_tm1, (-1, input_shape[-1]))
 
-        def inputs_f(): return inputs
-        def output_f(): return y_tm1
-        current_inputs = tf.case(
-            [(tf.equal(inputs_sum, 0.0), output_f)],
-            default=inputs_f
-        )
+            inputs_sum = tf.reduce_sum(inputs)
 
-        return self.layer.step(
-            current_inputs,
-            states
-        )
+            def inputs_f(): return inputs
+            def output_f(): return y_tm1
+            current_inputs = tf.case(
+                [(tf.equal(inputs_sum, 0.0), output_f)],
+                default=inputs_f
+            )
+
+            return self.layer.step(
+                current_inputs,
+                states
+            )
+
+        return step
