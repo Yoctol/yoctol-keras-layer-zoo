@@ -88,7 +88,7 @@ The RNNCell add another Dense layer behind its recurrent layer.
  model.compile('sgd', 'mean_squared_error')
  ```
  
- #### RNN Encoder wrapper
+#### RNN Encoder wrapper
  
  The RNN Encoder encodes sequences into a fixed length vector and 
  pads zero vectors after the encoded vector to provide mask function 
@@ -148,8 +148,14 @@ That's why we pad zero vectors after the encoded vector in RNN Encoder.
 
 Note that your encoding size should be the same with the decoding size.
 
+The decoder could also decode sequences with different length by specifying
+your decoding length.
+
  * Usage:
  
+  * Auto-encoder: decoding sequences whose length and mask are same with
+  the input sequences.
+
  ```python
  from keras.models import Model, Input
  from keras.layers import LSTM, Masking
@@ -166,6 +172,30 @@ Note that your encoding size should be the same with the decoding size.
      LSTM(
          units=decoding_size
      )
+ )(encoded_seq)
+ model = Model(inputs, outputs)
+ model.compile('sgd', 'mean_squared_error')
+ ```
+
+  * Seq2Seq: decoding sequences whose length is different with input sequences
+
+ ```python
+ from keras.models import Model, Input
+ from keras.layers import LSTM, Masking
+ from yklz import RNNEncoder, RNNDecoder
+ 
+ inputs = Input(shape=(max_length, feature_size))
+ masked_inputs = Masking(0.0)(inputs)
+ encoded_seq = RNNEncoder(
+     LSTM(
+         units=encoding_size,
+     )
+ )(masked_inputs)
+ outputs = RNNDecoder(
+     LSTM(
+         units=decoding_size
+     ),
+     time_steps=decoding_length
  )(encoded_seq)
  model = Model(inputs, outputs)
  model.compile('sgd', 'mean_squared_error')
@@ -363,10 +393,12 @@ from yklz import MaskPooling
 from yklz import RNNDecoder
 from yklz import RNNCell
 
-input_seq = Input(shape=(input_seq_max_length, word_embedding_size, channel_size))
-output_seq = Input(shape=(output_seq_max_length, word_embedding_size))
-masked_inputs = MaskConv(0.0)(input_seq)
-masked_outputs = Masking(0.0)(output_seq)
+inputs = Input(shape=(input_seq_max_length, word_embedding_size, channel_size))
+masked_inputs = MaskConv(0.0)(inputs)
+masked_seq = MaskToSeq(
+    layer=MaskConv(0.0),
+    time_axis=1,
+)(inputs)
 
 conv_outputs = MaskConvNet(
     Conv2D(
@@ -385,7 +417,7 @@ pooling_outputs = MaskPooling(
 )(conv_outputs)
 
 encoded = ConvEncoder()(
-    [pooling_outputs, masked_outputs]
+    [pooling_outputs, masked_seq]
 )
 
 outputs = RNNDecoder(
@@ -396,8 +428,9 @@ outputs = RNNDecoder(
         Dense(
             units=decoding_size
         )
-    )
+    ),
+    time_steps=decoding_size
 )(encoded)
-model = Model([input_seq, output_seq], outputs)
+model = Model(inputs, outputs)
 model.compile('sgd', 'mean_squared_error')
 ```

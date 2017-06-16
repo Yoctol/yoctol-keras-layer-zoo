@@ -8,12 +8,18 @@ import tensorflow as tf
 import yklz.backend as YK
 
 class RNNDecoder(Wrapper):
-    def __init__(self, layer, **kwargs):
+    def __init__(
+            self,
+            layer,
+            time_steps=None,
+            **kwargs
+        ):
         super(RNNDecoder, self).__init__(
             layer,
             **kwargs
         )
         self.layer.return_sequences = True
+        self.time_steps = time_steps
         self.supports_masking = True
 
     def build(self, input_shape):
@@ -22,15 +28,31 @@ class RNNDecoder(Wrapper):
         super(RNNDecoder, self).build(input_shape)
 
     def compute_output_shape(self, input_shape):
-        return self.layer.compute_output_shape(
+        output_shape = self.layer.compute_output_shape(
             input_shape
         )
 
+        if self.time_steps is None:
+            return output_shape
+        else:
+            return (
+                output_shape[0],
+                self.time_steps,
+                output_shape[2]
+            )
+
     def compute_mask(self, inputs, mask):
-        return self.layer.compute_mask(
+        output_mask =  self.layer.compute_mask(
             inputs=inputs,
             mask=mask,
         )
+
+        if self.time_steps is None:
+            return output_mask
+        else:
+            output_mask = K.ones_like(output_mask)
+            output_mask = K.any(output_mask, axis=1, keepdims=True)
+            return K.tile(output_mask, [1, self.time_steps])
 
     def call(
         self,
@@ -73,14 +95,15 @@ class RNNDecoder(Wrapper):
         constants = self.layer.get_constants(inputs, training=None)
         preprocessed_input = self.layer.preprocess_input(inputs, training=None)
         step_function = self.step_with_training(training)
-        last_output, outputs, states = YK.rnn(step_function,
+        last_output, outputs, states = YK.rnn_decoder(step_function,
                                              preprocessed_input,
                                              initial_state,
                                              go_backwards=self.layer.go_backwards,
                                              mask=mask,
                                              constants=constants,
                                              unroll=self.layer.unroll,
-                                             input_length=input_shape[1])
+                                             input_length=input_shape[1],
+                                             time_steps=self.time_steps)
         if self.layer.stateful:
             updates = []
             for i in range(len(states)):
@@ -119,3 +142,10 @@ class RNNDecoder(Wrapper):
             )
 
         return step
+
+    def get_config(self):
+        config = {
+            'time_steps': self.time_steps,
+        }
+        base_config = super(RNNDecoder, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
