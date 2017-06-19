@@ -29,13 +29,6 @@ class TestBidirectionalRNNEncoderBaseClass(TestRNNBaseClass):
         model.compile('sgd', 'mean_squared_error')
         return model
 
-    def test_output_shape(self):
-        result = self.model.predict(self.data)
-        self.assertEqual(
-            result.shape,
-            (self.data_size, self.max_length, self.encoding_size)
-        )
-
     def test_mask_value(self):
         result = self.model.predict(self.data)
         np.testing.assert_array_almost_equal(
