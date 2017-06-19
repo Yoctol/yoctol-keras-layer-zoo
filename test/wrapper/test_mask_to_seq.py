@@ -42,12 +42,23 @@ class TestMaskToSeq2DClass(TestBase2DClass, TestCase):
     def test_image_data_mask_value(self):
         result = self.model.predict(self.data)
         np.testing.assert_almost_equal(
-            result,
+            result[:, :self.x_start, :],
             np.zeros((
                 self.batch_size,
-                self.x,
+                self.x_start,
                 self.y * self.channel_size
             ))
+        )
+        np.testing.assert_almost_equal(
+            result[:, self.x_end:, :],
+            np.zeros((
+                self.batch_size,
+                self.x - self.x_end,
+                self.y * self.channel_size
+            ))
+        )
+        self.assertTrue(
+            np.sum(result[:, self.x_start:self.x_end, :], dtype=bool)
         )
 
     def test_seq_data_mask_value(self):
@@ -71,7 +82,21 @@ class TestMaskToSeq2DClass(TestBase2DClass, TestCase):
             session=K.get_session(),
             feed_dict={self.model.input: self.data}
         )
-        self.assertFalse(np.any(mask))
+        self.assertTrue(
+            np.all(
+                mask[:, self.x_start:self.x_end]
+            )
+        )
+        self.assertFalse(
+            np.any(
+                mask[:, :self.x_start]
+            )
+        )
+        self.assertFalse(
+            np.any(
+                mask[:, self.x_end:]
+            )
+        )
 
     def test_seq_data_mask(self):
         mask_cache_key = str(id(self.model.input)) + '_' + str(id(None))
