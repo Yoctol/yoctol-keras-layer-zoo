@@ -129,9 +129,9 @@ class RNNCell(Layer):
     @property
     def constraints(self):
         constraints = {}
-        if hasattr(self.recurrent_layer.layer, 'constraints'):
+        if hasattr(self.recurrent_layer, 'constraints'):
             constraints.update(self.recurrent_layer.constraints)
-        if hasattr(self.dense_layer.layer, 'constraints'):
+        if hasattr(self.dense_layer, 'constraints'):
             constraints.update(self.dense_layer.constraints)
         return self.dense_layer.constraints
 
