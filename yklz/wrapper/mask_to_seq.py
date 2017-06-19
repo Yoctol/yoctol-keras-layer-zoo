@@ -27,7 +27,7 @@ class MaskToSeq(Wrapper):
 
         reduce_time = len(mask_shape) - 2
         for _ in range(reduce_time):
-            mask_tensor = K.all(mask_tensor, -1)
+            mask_tensor = K.any(mask_tensor, -1)
         return mask_tensor
 
     def call(self, inputs, mask=None):
