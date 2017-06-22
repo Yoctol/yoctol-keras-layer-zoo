@@ -429,8 +429,15 @@ outputs = RNNDecoder(
             units=decoding_size
         )
     ),
-    time_steps=decoding_size
+    time_steps=decoding_length
 )(encoded)
 model = Model(inputs, outputs)
 model.compile('sgd', 'mean_squared_error')
 ```
+
+For more examples you could visit our seq2vec repository.
+
+https://github.com/Yoctol/seq2vec
+
+The seq2vec repository contains auto-encoder models which encode 
+sequences into fixed length feature vector.

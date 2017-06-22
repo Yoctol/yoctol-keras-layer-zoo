@@ -18,6 +18,7 @@ from .pooling.mask_pooling import MaskPooling
 '''Utility Layers'''
 from .util.padding_layer import PaddingZero
 from .util.flatten import MaskFlatten
+from .util.pick import Pick
 
 '''Wrapper Layers'''
 from .wrapper.mask_to_seq import MaskToSeq

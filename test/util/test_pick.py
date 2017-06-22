@@ -1,15 +1,17 @@
-'''RNN base test case'''
+'''Pick layer test case'''
 import os
 from unittest import TestCase
-from unittest.mock import patch
 
 import numpy as np
 import keras.backend as K
 from keras.models import Model, Input
 from keras.layers.core import Masking
+from keras.layers import LSTM
 from keras.models import load_model
 
-class TestRNNBaseClass(object):
+from yklz import RNNEncoder, Pick
+
+class TestPickClass(TestCase):
 
     def setUp(self):
         self.max_length = 10
@@ -26,18 +28,23 @@ class TestRNNBaseClass(object):
         self.data[:, self.mask_start_point:, :] = 0.0
         self.y = np.random.rand(
             self.data_size,
-            self.max_length,
             self.encoding_size
         )
         self.custom_objects = {}
+        self.custom_objects['RNNEncoder'] = RNNEncoder
+        self.custom_objects['Pick'] = Pick
+        self.model = self.create_model()
 
-    def create_model(self, rnn_layer):
+    def create_model(self):
         inputs = Input(shape=(self.max_length, self.feature_size))
         masked_inputs = Masking(0.0)(inputs)
-        outputs = rnn_layer(
-            self.encoding_size,
-            return_sequences=True
+        encoded = RNNEncoder(
+            LSTM(
+                self.encoding_size,
+                return_sequences=True
+            )
         )(masked_inputs)
+        outputs = Pick()(encoded)
         model = Model(inputs, outputs)
         model.compile('sgd', 'mean_squared_error')
         return model
@@ -46,29 +53,13 @@ class TestRNNBaseClass(object):
         result = self.model.predict(self.data)
         self.assertEqual(
             result.shape,
-            (self.data_size, self.max_length, self.encoding_size)
+            (self.data_size, self.encoding_size)
         )
 
-    @patch('keras.models.Model.fit')
-    def test_training(self, patch_fit):
-        self.model.fit(
-            self.data,
-            self.y,
-            epochs=2,
-            validation_split=0.1,
-            batch_size=10
-        )
+    def test_output_value_not_zero(self):
         result = self.model.predict(self.data)
-        self.assertEqual(
-            result.shape,
-            (self.data_size, self.max_length, self.encoding_size)
-        )
-
-    def test_mask_function(self):
-        result = self.model.predict(self.data)
-        np.testing.assert_array_almost_equal(
-            result[:, self.mask_start_point - 1, :],
-            result[:, -1, :]
+        self.assertTrue(
+            np.sum(result, dtype=bool)
         )
 
     def test_mask(self):
@@ -78,8 +69,9 @@ class TestRNNBaseClass(object):
             session=K.get_session(),
             feed_dict={self.model.input: self.data}
         )
-        self.assertFalse(np.any(mask[:, self.mask_start_point:]))
-        self.assertTrue(np.all(mask[:, :self.mask_start_point]))
+        self.assertTrue(
+            np.all(mask)
+        )
 
     def test_save_load(self):
         answer = self.model.predict(self.data)
@@ -93,7 +85,7 @@ class TestRNNBaseClass(object):
         result = self.model.predict(self.data)
         self.assertEqual(
             result.shape,
-            (self.data_size, self.max_length, self.encoding_size)
+            (self.data_size, self.encoding_size)
         )
         np.testing.assert_array_almost_equal(
             answer,
