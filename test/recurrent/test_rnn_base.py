@@ -82,6 +82,7 @@ class TestRNNBaseClass(object):
         self.assertTrue(np.all(mask[:, :self.mask_start_point]))
 
     def test_save_load(self):
+        answer = self.model.predict(self.data)
         model_name = self.__class__.__name__ + '_temp.model'
         self.model.save(model_name)
         self.model = load_model(
@@ -93,4 +94,8 @@ class TestRNNBaseClass(object):
         self.assertEqual(
             result.shape,
             (self.data_size, self.max_length, self.encoding_size)
+        )
+        np.testing.assert_array_almost_equal(
+            answer,
+            result
         )
