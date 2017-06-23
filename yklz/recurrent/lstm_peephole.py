@@ -92,7 +92,7 @@ class LSTMPeephole(LSTM):
             o = self.recurrent_activation(
                 x_o + K.dot(c_tm1 * rec_dp_mask[3], self.recurrent_kernel_o)
             )
-        h = o * self.activation(c)
+        h = o * c
         if 0 < self.dropout + self.recurrent_dropout:
             h._uses_learning_phase = True
         return h, [h, c]
