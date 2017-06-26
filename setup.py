@@ -8,7 +8,7 @@ except IOError:
 
 setup(
     name="yoctol-keras-layer-zoo",
-    version="0.3.1",
+    version="0.6.3",
     description="A pip package",
     license="GPL3",
     author="plliao",
